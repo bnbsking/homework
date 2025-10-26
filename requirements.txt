@@ -1,0 +1,4 @@
+ipykernel
+jupyter
+openai
+pandas 
