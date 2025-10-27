@@ -1,0 +1,50 @@
+core:
+  base_url: "https://api.studio.nebius.com/v1/"
+  NEBIUS_API_KEY: "eyJhbGciOiJIUzI1NiIsImtpZCI6IlV6SXJWd1h0dnprLVRvdzlLZWstc0M1akptWXBvX1VaVkxUZlpnMDRlOFUiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJnb29nbGUtb2F1dGgyfDExMzY5MTg2MDU1ODc3Mjk5OTAwMSIsInNjb3BlIjoib3BlbmlkIG9mZmxpbmVfYWNjZXNzIiwiaXNzIjoiYXBpX2tleV9pc3N1ZXIiLCJhdWQiOlsiaHR0cHM6Ly9uZWJpdXMtaW5mZXJlbmNlLmV1LmF1dGgwLmNvbS9hcGkvdjIvIl0sImV4cCI6MTkxNTU1Mjk5NCwidXVpZCI6IjAxOTk0OTY1LWU3YjgtN2M2OS1hMzU0LTdhMGU0MGU1ZDQ0OCIsIm5hbWUiOiJMZW8iLCJleHBpcmVzX2F0IjoiMjAzMC0wOS0xM1QxODowMzoxNCswMDAwIn0.SQOaI-qbfibMmNcJ9J9b2tPrUKEK-MTbREFIYDjHUaY"
+
+indexer:
+  pdf_path: "data/Medical File.pdf"
+  chunk_size: 800
+  chunk_overlap: 80
+
+  embedding_model: "BAAI/bge-multilingual-gemma2"
+  emb_dim: 3584
+
+  processed_index_path: "processed_data/faiss_index.idx"
+  processed_corpus_path: "processed_data/corpus.csv"
+
+retriever:
+  info_model: "openai/gpt-oss-120b"
+  info_getters:
+    InfoGetterFaiss:
+      - name: medical_events
+        faiss_query: faiss_medical_events
+        faiss_top_k: 20
+        llm_query: llm_summary_medical_events
+        concat: False
+    InfoGetterRe:
+      - name: SSN
+        patterns: "SSN.*(\\d{3}-\\d{2}-\\d{4})"
+    InfoGetterReLLM:
+      - name: name
+        patterns: " ([A-Z][a-z]+ [A-Z][a-z]+)"
+        top_k: 10
+        llm_query: extract_name
+        key: name
+      - name: AOD
+        patterns: "(Date of Admission|Admit Date|AOD)[:\\s]+([A-Za-z0-9,/\\s]+)"
+        top_k: 10
+        llm_query: extract_aod
+        key: aod
+      - name: DOB
+        patterns: "(Date of Birth|DOB)[:\\s]+([A-Za-z0-9,/\\s]+)"
+        top_k: 10
+        llm_query: extract_dob
+        key: dob
+    PostProcessAge:
+      args:
+        birth: DOB
+        key: current_age
+      
+  save_path: "processed_data/retrieved_info.json"
+    

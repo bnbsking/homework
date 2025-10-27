@@ -5,6 +5,6 @@ $projectPath = "C:\Users\James\Desktop\code\homework"
 docker run -it --rm `
   -v "${projectPath}:/app" `
   -w /app `
-  --name fapp `
+  --name happ `
   pytorch/pytorch:2.7.1-cuda11.8-cudnn9-runtime `
   /bin/bash
